@@ -1,6 +1,7 @@
 # Job-Posting-Monitor
 Repository to manage job posting monitor development and integration with AAMU community platform 
 
+````
 job_posting_monitor/
 │
 ├── config/
@@ -50,4 +51,4 @@ job_posting_monitor/
 ├── requirements.txt             # List of all Python dependencies (BeautifulSoup, Scrapy, etc.)
 ├── README.md                    # Project description, setup instructions, and usage
 └── .gitignore                   # Files/folders to ignore in version control (e.g., `credentials.json`, `logs/`)
-
+````
