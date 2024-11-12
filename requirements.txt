@@ -1,0 +1,17 @@
+# Web scraping
+beautifulsoup4
+requests
+selenium
+
+# Data storage
+sqlalchemy  # Or use pymongo if storing unstructured data in MongoDB
+
+# Data manipulation and analysis
+pandas
+
+# Data visualization
+matplotlib
+seaborn
+
+# Notifications and automation
+schedule
