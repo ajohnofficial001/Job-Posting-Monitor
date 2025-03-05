@@ -54,15 +54,15 @@ try:
 
             try:
                 # Extract location text (May need further checking)
-                location_element = job.find_element(By.CSS_SELECTOR, ".job-result-label span")
+                location_element = job.find_element(By.CSS_SELECTOR, "span.label-value.location")
                 location = location_element.text.strip()
             except:
                 location = "N/A"
 
             try:
                 # Extract type (May need to refine)
-                type_element = job.find_element(By.CSS_SELECTOR, ".label-value tags1 span")
-                type_element = type_element.text.strip()
+                type_element = job.find_element(By.CSS_SELECTOR, "span.label-value.tags1")
+                type = type_element.text.strip()
             except:
                 type = "N/A"
 
