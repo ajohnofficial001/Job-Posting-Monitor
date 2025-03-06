@@ -37,7 +37,7 @@ try:
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, "mosaic-provider-jobcards")))
 
     # Get the job listings
-    job_cards = driver.find_elements(By.CLASS_NAME, "mosaic-provider-jobcards")
+    job_cards = driver.find_elements(By.CLASS_NAME, "job_seen_beacon")
 
     # Open the CSV file for writing
     with open(output_csv_file, mode='w', newline='', encoding='utf-8') as file:
