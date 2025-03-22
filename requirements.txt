@@ -1,10 +1,9 @@
 # Web scraping
-beautifulsoup4
 requests
 selenium
 
 # Data storage
-sqlalchemy  # Or use pymongo if storing unstructured data in MongoDB
+pymongo  # Or use  if storing unstructured data in MongoDB
 
 # Data manipulation and analysis
 pandas

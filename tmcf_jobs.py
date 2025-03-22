@@ -11,7 +11,7 @@ import time
 options = Options()
 options.add_argument("--headless")
 
-gecko_driver_path = r"C:\Users\008ah\Desktop\TMCF-Webscraping\WebDriver\geckodriver.exe"
+gecko_driver_path = "C:/WebDriver/geckodriver.exe"
 
 service = Service(executable_path=gecko_driver_path)
 driver = webdriver.Firefox(service=service, options=options)

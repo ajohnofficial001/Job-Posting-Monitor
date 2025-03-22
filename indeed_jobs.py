@@ -6,6 +6,7 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
+import time
 
 # Set up Firefox options
 options = Options()
@@ -40,11 +41,24 @@ try:
 
     # Open the search URL
     driver.get(search_url)
+    time.sleep(5)  # Allow initial load
+
+    # ---------------------------
+    # Scroll to trigger dynamic load
+    # ---------------------------
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    while True:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)  # Wait for new content to load
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
 
     # Wait for the job results container
     wait = WebDriverWait(driver, 20)
     job_results_container = wait.until(
-        EC.presence_of_element_located((By.ID, "mosaic-jobResults"))
+        EC.presence_of_element_located((By.CLASS_NAME, "job_seen_beacon"))
     )
 
     # Get the job listings within the container
@@ -75,7 +89,6 @@ try:
                 summary_elements = job.find_elements(By.CSS_SELECTOR, 'div[data-testid="attribute_snippet_testid"]')
                 summary_salary = ''
                 summary_type = ''
-
                 for element in summary_elements:
                     text = element.text.strip()
                     if any(word in text for word in ['per hour', 'per year', '$']):

@@ -19,7 +19,7 @@ service = Service(executable_path=gecko_driver_path)
 driver = webdriver.Firefox(service=service, options=options)
 
 # File path for the output CSV
-output_csv_file = "linkedin_test.csv"
+output_csv_file = "linkedin_jobs.csv"
 
 # LinkedIn job search URL
 job_title = "Software Engineer Intern"
@@ -43,20 +43,20 @@ try:
         print("No sign-in popover detected.")
 
     # Scroll to load all job cards
-    print("Scrolling to load all job postings...")
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    while True:
-        # Scroll down to the bottom of the page
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(5)  # Wait for new content to load
+    # print("Scrolling to load all job postings...")
+    # last_height = driver.execute_script("return document.body.scrollHeight")
+    # while True:
+    #     # Scroll down to the bottom of the page
+    #     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    #     time.sleep(5)  # Wait for new content to load
 
-        # Calculate new scroll height and compare with the last scroll height
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:  # Break the loop if no new content is loaded
-            break
-        last_height = new_height
+    #     # Calculate new scroll height and compare with the last scroll height
+    #     new_height = driver.execute_script("return document.body.scrollHeight")
+    #     if new_height == last_height:  # Break the loop if no new content is loaded
+    #         break
+    #     last_height = new_height
 
-    print("All job postings loaded.")
+    # print("All job postings loaded.")
 
     # Wait for the job list container to load
     wait = WebDriverWait(driver, 20)

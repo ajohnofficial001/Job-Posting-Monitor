@@ -6,114 +6,126 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 
 # Set up Firefox options
 options = Options()
-options.add_argument("--headless")  # Run Firefox in headless mode (remove for debugging)
+options.add_argument("--headless")  # Remove for debugging
 
 # Specify the path to GeckoDriver
-gecko_driver_path = '/WebDriver/geckodriver.exe'
+gecko_driver_path = 'C:/WebDriver/geckodriver.exe'
 
 # Initialize the WebDriver
 service = Service(executable_path=gecko_driver_path)
 driver = webdriver.Firefox(service=service, options=options)
 
-# UNCF Opportunities Page
+# Base UNCF Opportunities Page (single page)
 uncf_url = "https://scholarships.uncf.org/s/search-wizard?id=Scholarships%2CInternships%2CFellowships%2CCareer&value="
 
 # File path for output CSV
 output_csv_file = "uncf_opportunities.csv"
 
+def parse_current_page(writer):
+    """
+    Scrapes the current page's rows and writes them to CSV.
+    If a row has all fields as N/A, it skips that row.
+    """
+    wait = WebDriverWait(driver, 10)
+    tbody_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
+    rows = tbody_element.find_elements(By.TAG_NAME, "tr")
+    
+    for index, row in enumerate(rows):
+        # Reset fields for this row
+        program_name = "N/A"
+        program_type = "N/A"
+        award_year = "N/A"
+        open_date = "N/A"
+        deadline = "N/A"
+        application_link = "N/A"
+        
+        try:
+            # Extract Program Name from <th>
+            try:
+                th_elem = row.find_element(By.TAG_NAME, "th")
+                program_name = th_elem.get_attribute("data-cell-value").strip()
+            except Exception:
+                pass
+
+            # Extract Program Type
+            try:
+                program_type_elem = row.find_element(By.XPATH, './/td[@data-label="Program Type"]')
+                program_type = program_type_elem.get_attribute("data-cell-value").strip()
+            except Exception:
+                pass
+
+            # Extract Award Year
+            try:
+                award_year_elem = row.find_element(By.XPATH, './/td[@data-label="Award Year"]')
+                award_year = award_year_elem.get_attribute("data-cell-value").strip()
+            except Exception:
+                pass
+
+            # Extract Open Date
+            try:
+                open_date_elem = row.find_element(By.XPATH, './/td[@data-label="Open Date"]')
+                open_date = open_date_elem.get_attribute("data-cell-value").strip()
+            except Exception:
+                pass
+
+            # Extract Deadline
+            try:
+                deadline_elem = row.find_element(By.XPATH, './/td[@data-label="Deadline"]')
+                deadline = deadline_elem.get_attribute("data-cell-value").strip()
+            except Exception:
+                pass
+
+            # Click the button to open detailed application link in a new tab
+            try:
+                button_elem = th_elem.find_element(By.TAG_NAME, "button")
+                main_window = driver.current_window_handle
+                driver.execute_script("arguments[0].click();", button_elem)
+                time.sleep(2)
+                
+                # Get all window handles and switch to the new tab
+                all_handles = driver.window_handles
+                if len(all_handles) > 1:
+                    for handle in all_handles:
+                        if handle != main_window:
+                            driver.switch_to.window(handle)
+                            time.sleep(1)
+                            application_link = driver.current_url
+                            driver.close()
+                            time.sleep(1)
+                            driver.switch_to.window(main_window)
+                            time.sleep(1)
+                            break
+            except Exception:
+                # If clicking the button fails, application_link remains "N/A"
+                pass
+
+            # If all non-link fields are N/A, skip this row
+            if (program_name == "N/A" and program_type == "N/A" and 
+                award_year == "N/A" and open_date == "N/A" and 
+                deadline == "N/A"):
+                print(f"Skipping row {index+1} as all fields are N/A.")
+                break
+
+            writer.writerow([program_name, program_type, award_year, open_date, deadline, application_link])
+            print(f"Extracted row {index+1}: {program_name} - {application_link}")
+
+        except Exception as e:
+            print(f"Error extracting row {index+1}: {e}")
+
 try:
-    # Open UNCF page
     driver.get(uncf_url)
     time.sleep(5)  # Allow time for the page to load
 
-    # Wait for the table body containing the opportunities
-    wait = WebDriverWait(driver, 20)
-    tbody_element = wait.until(EC.presence_of_element_located((By.TAG_NAME, "tbody")))
-
-    # Find all scholarship rows inside <tbody>
-    rows = tbody_element.find_elements(By.TAG_NAME, "tr")
-
-    # Open CSV file for writing
     with open(output_csv_file, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(["Program Name", "Program Type", "Award Year", "Open Date", "Deadline", "Application Link"])
-
-        for index, row in enumerate(rows):
-            try:
-                # Extract Program Name from <th> (contains a button)
-                try:
-                    program_name_element = row.find_element(By.TAG_NAME, "th")
-                    program_name = program_name_element.get_attribute("data-cell-value").strip()
-                except:
-                    program_name = "N/A"
-
-                # Extract Program Type
-                try:
-                    program_type_element = row.find_element(By.XPATH, './/td[@data-label="Program Type"]')
-                    program_type = program_type_element.get_attribute("data-cell-value").strip()
-                except:
-                    program_type = "N/A"
-
-                # Extract Award Year
-                try:
-                    award_year_element = row.find_element(By.XPATH, './/td[@data-label="Award Year"]')
-                    award_year = award_year_element.get_attribute("data-cell-value").strip()
-                except:
-                    award_year = "N/A"
-
-                # Extract Open Date
-                try:
-                    open_date_element = row.find_element(By.XPATH, './/td[@data-label="Open Date"]')
-                    open_date = open_date_element.get_attribute("data-cell-value").strip()
-                except:
-                    open_date = "N/A"
-
-                # Extract Deadline
-                try:
-                    deadline_element = row.find_element(By.XPATH, './/td[@data-label="Deadline"]')
-                    deadline = deadline_element.get_attribute("data-cell-value").strip()
-                except:
-                    deadline = "N/A"
-
-                # Click the button to open the modal/pop-up
-                try:
-                    button_element = program_name_element.find_element(By.TAG_NAME, "button")
-                    driver.execute_script("arguments[0].click();", button_element)  # Use JavaScript click
-                    time.sleep(2)  # Wait for modal to open
-
-                    # Extract the actual application link from the modal
-                    try:
-                        link_element = WebDriverWait(driver, 5).until(
-                            EC.presence_of_element_located((By.XPATH, '//a[contains(@href, "scholarships.uncf.org/details")]'))
-                        )
-                        application_link = link_element.get_attribute("href")
-                    except:
-                        application_link = "N/A"
-
-                    # Close the modal (if applicable)
-                    try:
-                        close_button = driver.find_element(By.XPATH, '//button[@title="Close"]')
-                        close_button.click()
-                        time.sleep(2)  # Wait for modal to close
-                    except:
-                        print("No close button found, continuing...")
-
-                except:
-                    application_link = "N/A"
-
-                # Write to CSV
-                writer.writerow([program_name, program_type, award_year, open_date, deadline, application_link])
-
-                print(f"Extracted {index + 1}: {program_name} - {application_link}")
-
-            except Exception as e:
-                print(f"Error extracting opportunity {index + 1}: {e}")
+        parse_current_page(writer)
 
 finally:
-    # Close WebDriver
     driver.quit()
 
-print(f"UNCF opportunities saved to {output_csv_file}.")
+print(f"\nUNCF opportunities saved to {output_csv_file}.")

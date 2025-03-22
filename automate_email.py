@@ -13,19 +13,21 @@ smtp_password = "mkhb urih jmub kety"  #mkhb urih jmub kety  password
 
 # Email Details
 from_email = smtp_user
-to_email = "john.adeyemo@bulldogs.aamu.edu"
+to_emails = ["john.adeyemo@bulldogs.aamu.edu", "johnadeyemo001@gmail.com"]
 subject = "Test Email with CSV Attachments"
 body = "Hello,\n\nPlease find the attached CSV files.\n\nBest regards,\nJohn"
 
 # Attachments (CSV files)
 file1 = "indeed_jobs.csv"
 file2 = "linkedin_jobs.csv"
+file3 = "tmcf_jobs.csv"
+file4 = "uncf_opportunities.csv"
 
 
 # Create Email
 msg = MIMEMultipart()
 msg["From"] = from_email
-msg["To"] = to_email
+msg["To"] = to_emails[0]
 msg["Subject"] = subject
 msg.attach(MIMEText(body, "plain"))
 
@@ -44,13 +46,15 @@ def attach_file(msg, filename):
 # Attach CSV
 attach_file(msg, file1)
 attach_file(msg, file2)
+attach_file(msg, file3)
+attach_file(msg, file4)
 
 # Send Email
 try:
     server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()  # Secure the connection
     server.login(smtp_user, smtp_password)
-    server.sendmail(from_email, to_email, msg.as_string())
+    server.sendmail(from_email, to_emails, msg.as_string())
     print("Email sent successfully with attachments!")
 except Exception as e:
     print(f"Error sending email: {e}")
